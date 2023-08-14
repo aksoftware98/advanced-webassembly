@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebAssembly Side-Module</title>
+</head>
+<body>
+    <script src="calculator-plumping.js"></script>
+    <script>
+      console.log(isWebAssemblySupported());
+      loadModule();
+
+      // Check the browser supports the insantiateStreaming function 
+      function isInstantiateStreamingSupported() {
+        if (typeof WebAssembly.instantiateStreaming === 'function') {
+          return true;
+        }
+        return false;
+      }
+
+      function loadModule() {
+        if (!isWebAssemblySupported) {
+            console.log('WebAssembly is not supported');
+            return;
+        }
+
+        var moduleName = 'side_module.wasm';
+
+        const memory = new WebAssembly.Memory({initial: 256, maximum: 256});
+        const importObject = {
+        env: {
+            __memory_base: 0,
+            __table_base: 0,
+            memory: memory
+        }
+        }
+        if (isInstantiateStreamingSupported) {
+            WebAssembly.instantiateStreaming(fetch(moduleName), importObject)
+            .then(result => {
+                const value = result.instance.exports._Z9Incrementi(1);
+                console.log(value);
+            });
+        } else {
+            fetch(moduleName)
+            .then(response => response.arrayBuffer())
+            .then(bytes => WebAssembly.instantiate(bytes, importObject))
+            .then(result => {
+                const value = result.instance.exports._Z9Incrementi(1);
+                console.log(value);
+            });
+        }
+
+      }
+     
+    </script>
+</body>
+</html>

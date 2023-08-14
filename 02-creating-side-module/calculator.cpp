@@ -1,4 +1,4 @@
-int increment(int number) 
-{
-    return number++;
+int Increment(int value)
+{ 
+  return (value + 1); 
 }
