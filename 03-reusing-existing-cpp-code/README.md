@@ -26,3 +26,8 @@ The C++ method overloading feature will lead to having different name for the ex
     }
 #endif
 ```
+
+To be able to call those methods from JavaScript and pass the requried parameters, we need to use the **ccall** method and **UTF8ToString** method that we can generate in the compilation command as shown below 
+```ps
+emcc Validation.cpp -o validate.js -s EXTRA_EXPORTED_RUNTIME_METHODS=['ccall', 'UTF8ToString']
+``` 

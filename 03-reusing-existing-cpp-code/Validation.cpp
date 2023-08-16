@@ -37,6 +37,18 @@ extern "C" {
         return 1;
     }
 
+
+    // Check if a selected category is existing in array 
+    int IsCategoryInArray(char* selected_category_id, int* valid_category_ids, int array_length) {
+        int category_id = atoi(selected_category_id);
+        for (int index = 0; index < array_length; index++) {
+            if (category_id == valid_category_ids[index]) {
+                return 1;
+            }
+        }
+        return 0;
+    }
+
 #ifdef __EMSCRIPTEN__
         EMSCRIPTEN_KEEPALIVE
 #endif
@@ -59,16 +71,6 @@ extern "C" {
         return 1;
     }
 
-    // Check if a selected category is existing in array 
-    int IsCategoryInArray(char* selected_category_id, int* valid_category_ids, int array_length) {
-        int category_id = atoi(selected_category_id);
-        for (int index = 0; index < array_length; index++) {
-            if (category_id == valid_category_ids[index]) {
-                return 1;
-            }
-        }
-        return 0;
-    }
 #if __cplusplus
 }
 #endif
