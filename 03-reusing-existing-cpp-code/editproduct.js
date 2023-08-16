@@ -1,7 +1,7 @@
 // Simulate retrieving data from a database
 const initialData = {
     name: "Diadora Men Jeans",
-    categoryId: "1"
+    categoryId: "100"
 }
 
 const MAXIMIM_NAME_LENGTH = 50;
@@ -42,7 +42,7 @@ function onClickSave() {
     let errorMessage = "";
     const errorMessagePointer = _malloc(256);
     alert(errorMessagePointer);
-    if (!validateName(name, errorMessagePointer) || validateCategory(categoryId, errorMessagePointer)) {
+    if (!validateName(name, errorMessagePointer) || !validateCategory(categoryId, errorMessagePointer)) {
         errorMessage = Module.UTF8ToString(errorMessagePointer);
     }
     _free(errorMessagePointer);
