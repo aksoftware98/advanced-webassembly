@@ -1,76 +1,97 @@
-#include <cstdlib> 
+#include <cstdlib>
 #include <cstring>
 
+// If this is an Emscripten (WebAssembly) build then...
 #ifdef __EMSCRIPTEN__
-    #include <emscripten.h>
+  #include <emscripten.h>
 #endif
 
 #ifdef __cplusplus
-extern "C" {
+extern "C" { // So that the C++ compiler does not rename our function names
 #endif
 
-
-    // Create the validate value function that will be called to check if the value has a valid value for both product and categroy
-    int ValidateValueProvided(const char* value, const char* error_message, char* return_error_message)
+  int ValidateValueProvided(const char* value, const char* error_message, char* return_error_message)
+  {
+    // If the string is null or the first character is the null terminator then the string is empty
+    if ((value == NULL) || (value[0] == '\0'))
     {
-        if (value == NULL || value[0] == '\0') {
-            strcpy(return_error_message, error_message);
-            return 0;
-        }
-
-        return 1;
+      strcpy(return_error_message, error_message);
+      return 0;
     }
+
+    // Everything is ok
+    return 1;
+  }
 
 #ifdef __EMSCRIPTEN__
-    EMSCRIPTEN_KEEPALIVE
+  EMSCRIPTEN_KEEPALIVE
 #endif
-    // Create the validate name function that will check if the name validates the maximum length
-    int ValidateName(const char* name, const int maximum_length, char* return_error_message) {
-        if (ValidateValueProvided(name, "Name is required", return_error_message) == 0) {
-            return 0;
-        }
+  int ValidateName(char* name, int maximum_length, char* return_error_message)
+  {
+    // Validation 1: A name must be provided
+    if (ValidateValueProvided(name, "A Product Name must be provided.", return_error_message) == 0)
+    {
+      return 0;
+    }
 
-        if (strlen(name) > maximum_length) {
-            strcpy(return_error_message, "Name is too long");
-            return 0;
-        }
+    // Validation 2: A name must not exceed the specified length
+    if (strlen(name) > maximum_length)
+    {
+      strcpy(return_error_message, "The Product Name is too long.");
+      return 0;
+    }
+
+    // Everything is ok (no issues with the name)
+    return 1;
+  }
+
+  int IsCategoryIdInArray(char* selected_category_id, int* valid_category_ids, int array_length)
+  {
+    // Loop through the array of valid ids that were passed in...
+    int category_id = atoi(selected_category_id);
+    for (int index = 0; index < array_length; index++)
+    {
+      // If the selected id is in the array then...
+      if (valid_category_ids[index] == category_id)
+      {
+        // The user has a valid selection so exit now
         return 1;
+      }
     }
 
-
-    // Check if a selected category is existing in array 
-    int IsCategoryInArray(char* selected_category_id, int* valid_category_ids, int array_length) {
-        int category_id = atoi(selected_category_id);
-        for (int index = 0; index < array_length; index++) {
-            if (category_id == valid_category_ids[index]) {
-                return 1;
-            }
-        }
-        return 0;
-    }
+    // We did not find the category id in the array
+    return 0;
+  }
 
 #ifdef __EMSCRIPTEN__
-        EMSCRIPTEN_KEEPALIVE
+  EMSCRIPTEN_KEEPALIVE
 #endif
-    // Create the validate category function that will check if the selected category is valid and existing in the system 
-    int ValidateCategory(char* selected_category_id, int* validate_category_ids, int array_length, char* return_error_message) {
-        if (ValidateValueProvided(selected_category_id, "Category is required", return_error_message) == 0) {
-            return 0;
-        }
-
-        if ((validate_category_ids == NULL) || (array_length == 0)) {
-            strcpy(return_error_message, "There are no categories available");
-            return 0;
-        }
-
-        if (IsCategoryInArray(selected_category_id, validate_category_ids, array_length) == 0) {
-            strcpy(return_error_message, "Category is not valid");
-            return 0;
-        }
-
-        return 1;
+  int ValidateCategory(char* category_id, int* valid_category_ids, int array_length, char* return_error_message)
+  {
+    // Validation 1: A Category ID must be selected
+    if (ValidateValueProvided(category_id, "A Product Category must be selected.", return_error_message) == 0)
+    {
+      return 0;
     }
 
-#if __cplusplus
+    // Validation 2: A list of valid Category IDs must be passed in
+    if ((valid_category_ids == NULL) || (array_length == 0))
+    {
+      strcpy(return_error_message, "There are no Product Categories available.");
+      return 0;
+    }
+
+    // Validation 3: The selected Category ID must match one of the IDs provided
+    if (IsCategoryIdInArray(category_id, valid_category_ids, array_length) == 0)
+    {
+      strcpy(return_error_message, "The selected Product Category is not valid.");
+      return 0;
+    }
+
+    // Everything is ok (no issues with the category id)
+    return 1;
+  }
+
+#ifdef __cplusplus
 }
 #endif
