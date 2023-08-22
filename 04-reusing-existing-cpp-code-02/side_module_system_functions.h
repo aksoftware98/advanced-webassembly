@@ -15,5 +15,4 @@ size_t strlen(const char* value);
 
 int atoi(const char* value);
 
-
 #endif // SIDE_MODULE_SYSTEM_FUNCTIONS_H_

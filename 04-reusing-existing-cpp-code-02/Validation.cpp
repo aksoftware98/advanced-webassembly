@@ -1,5 +1,3 @@
-#include <cstdlib>
-#include <cstring>
 
 // If this is an Emscripten (WebAssembly) build then...
 #ifdef __EMSCRIPTEN__
@@ -9,7 +7,7 @@
 #ifdef __cplusplus
 extern "C" { // So that the C++ compiler does not rename our function names
 #endif
-
+  #include "side_module_system_functions.h"
   int ValidateValueProvided(const char* value, const char* error_message, char* return_error_message)
   {
     // If the string is null or the first character is the null terminator then the string is empty
@@ -95,3 +93,7 @@ extern "C" { // So that the C++ compiler does not rename our function names
 #ifdef __cplusplus
 }
 #endif
+
+int main() {
+ 
+}
