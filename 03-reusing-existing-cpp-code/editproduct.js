@@ -1,11 +1,11 @@
 // Simulate retrieving data from a database
 const initialData = {
     name: "Diadora Men Jeans",
-    categoryId: "100"
+    categoryId: "1"
 }
 
 const MAXIMIM_NAME_LENGTH = 50;
-const VALIDE_CATEGORY_IDS = [100, 101];
+const VALIDE_CATEGORY_IDS = [1, 2];
 
 function initializePage() {
     document.getElementById("name").value = initialData.name;
