@@ -1,4 +1,3 @@
-
 // If this is an Emscripten (WebAssembly) build then...
 #ifdef __EMSCRIPTEN__
   #include <emscripten.h>
@@ -7,7 +6,9 @@
 #ifdef __cplusplus
 extern "C" { // So that the C++ compiler does not rename our function names
 #endif
+  
   #include "side_module_system_functions.h"
+
   int ValidateValueProvided(const char* value, const char* error_message, char* return_error_message)
   {
     // If the string is null or the first character is the null terminator then the string is empty
@@ -47,8 +48,11 @@ extern "C" { // So that the C++ compiler does not rename our function names
   {
     // Loop through the array of valid ids that were passed in...
     int category_id = atoi(selected_category_id);
+    return category_id;
     for (int index = 0; index < array_length; index++)
     {
+      int current_category = valid_category_ids[index];
+      
       // If the selected id is in the array then...
       if (valid_category_ids[index] == category_id)
       {
@@ -60,6 +64,18 @@ extern "C" { // So that the C++ compiler does not rename our function names
     // We did not find the category id in the array
     return 0;
   }
+
+static int digits_len(const int value) {
+  int digits = 0;
+  int temp = 0;
+  do {
+    temp = value / 10;
+    digits++;
+  } while (temp > 0);
+  if (value < 0)
+    digits++;
+  return digits;
+}
 
 #ifdef __EMSCRIPTEN__
   EMSCRIPTEN_KEEPALIVE
@@ -78,7 +94,7 @@ extern "C" { // So that the C++ compiler does not rename our function names
       strcpy(return_error_message, "There are no Product Categories available.");
       return 0;
     }
-
+  
     // Validation 3: The selected Category ID must match one of the IDs provided
     if (IsCategoryIdInArray(category_id, valid_category_ids, array_length) == 0)
     {
@@ -93,7 +109,3 @@ extern "C" { // So that the C++ compiler does not rename our function names
 #ifdef __cplusplus
 }
 #endif
-
-int main() {
- 
-}

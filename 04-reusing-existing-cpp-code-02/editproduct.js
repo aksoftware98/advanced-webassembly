@@ -8,7 +8,7 @@ let moduleMemory = null;
 let moduleExports = null; 
 
 const MAXIMIM_NAME_LENGTH = 50;
-const VALIDE_CATEGORY_IDS = [1, 2];
+const VALIDE_CATEGORY_IDS = [1, 2, 3125];
 
 function isWebAssemblySupported() {
     try {
@@ -30,30 +30,13 @@ function initializePage() {
     console.log("WebAssembly supported: " + isSupported);
     // Setup WebAssembly 
     moduleMemory  = new WebAssembly.Memory({initial: 256, maximum: 256});
-   // Create a global object for AllocatedMemoryChunks
-const AllocatedMemoryChunks = new WebAssembly.Global(
-    { value: "i32", mutable: true }, // The type and mutability of the global variable
-    208 // The initial value of the global variable
-  );
-  
-  // Create a global object for current_allocated_count
-  const current_allocated_count = new WebAssembly.Global(
-    { value: "i32", mutable: true },
-    198
-  );
-  const table = new WebAssembly.Table({initial: 0, maximum: 0, element: "anyfunc"});
+
     const importObject = {
         env: {
             __memory_base: 0,
             memory: moduleMemory,
-            table: table,
+            __stack_pointer: new WebAssembly.Global({value: 'i32', mutable: true}, 0)
         },
-        GOT: {
-            mem: {
-              AllocatedMemoryChunks: AllocatedMemoryChunks, // Pass the global object as the value for the import
-              current_allocated_count: current_allocated_count
-            }
-        }
     }
     if (!isSupported) {
         console.log("WebAssembly is not supported");
@@ -98,7 +81,7 @@ function onClickSave() {
    
     let errorMessage = "";
     const errorMessagePointer = moduleExports.create_buffer(256);
-    alert(errorMessagePointer);
+   
     if (!validateName(name, errorMessagePointer) || !validateCategory(categoryId, errorMessagePointer)) {
         errorMessage = getStringFromMemory(errorMessagePointer);
     }
@@ -143,20 +126,23 @@ function validateName(name, errorMessagePointer) {
     return isValid === 1;
 }
 
-function validateCategory(selectedCategoryid, errorMessagePointer) {
-    const categoryIdPointer = moduleExports.create_buffer(selectedCategoryid.length + 1);
-    copyStringToMemory(selectedCategoryid, categoryIdPointer);
-    const arrayLength = VALIDE_CATEGORY_IDS.length; 
-    const bytesPerElement = 4;
-    const arrayPointer = moduleExports.create_buffer(bytesPerElement * arrayLength);
-    const bytes = new Uint32Array(moduleMemory.buffer);
-    bytes.set(VALIDE_CATEGORY_IDS, arrayPointer / bytesPerElement);
+function validateCategory(categoryId, errorMessagePointer) {
+  const categoryIdPointer = moduleExports.create_buffer((categoryId.length + 1));
+  copyStringToMemory(categoryId, categoryIdPointer);
 
-    const isValid = moduleExports.ValidateCategory(categoryIdPointer, arrayPointer, arrayLength, errorMessagePointer);
+  const arrayLength = VALIDE_CATEGORY_IDS.length;
+  const bytesPerElement = Int32Array.BYTES_PER_ELEMENT;
+  const arrayPointer = moduleExports.create_buffer((arrayLength * bytesPerElement));
+  
+  const bytesForArray = new Int32Array(moduleMemory.buffer);
+  bytesForArray.set(VALIDE_CATEGORY_IDS, (arrayPointer / bytesPerElement));
+  // Read an int value from the bytesForArray at the offset 4 
+   const value = bytesForArray.at(arrayPointer / bytesPerElement + 2);
+   console.log(value);
+  const isValid = moduleExports.ValidateCategory(categoryIdPointer, arrayPointer, arrayLength, errorMessagePointer);
 
-    // const isValid = Module.ccall('ValidateCategory', 'number', ['string', 'number', 'number', 'number'], [selectedCategoryid, arrayPointer, arrayLength, errorMessagePointer]);
-    moduleExports.free_buffer(arrayPointer);
-    moduleExports.free_buffer(categoryIdPointer);
+  moduleExports.free_buffer(arrayPointer);
+  moduleExports.free_buffer(categoryIdPointer);
 
-    return isValid === 1;
+  return (isValid === 1);
 }

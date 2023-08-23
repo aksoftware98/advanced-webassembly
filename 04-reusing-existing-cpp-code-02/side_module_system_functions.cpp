@@ -1,4 +1,5 @@
 #include <stdio.h>
+
 #ifdef __EMSCRIPTEN__
     #include <emscripten.h>
 #endif
@@ -150,38 +151,69 @@ extern "C" { // So that the C++ compiler does not rename our function names
   #ifdef __EMSCRIPTEN__
     EMSCRIPTEN_KEEPALIVE
     #endif
-  int atoi(const char* value)
+  int atoi(const char* buffer)
   {
-    // If a null pointer or an empty string was passed in then exit now
-    if ((value == NULL) || (value[0] == '\0')) { return 0; }
-
-    int result = 0;
-    int sign = 0;
-
-    // If we have a negative sign then set the flag and move to the next character.
-    if (*value == '-') { sign = -1; ++value; }
-
-    // Loop until we reach the null terminator of the string...
-    char current_value = *value;
-    while (current_value != '\0')
-    {
-      // If the current character is between 0 and 9 then...
-      if ((current_value >= '0') && (current_value <= '9'))
-      {
-        result = result * 10 + current_value - '0';// Convert the current character to an integer and add to to the result
-        ++value;
-        current_value = *value;
-      }
-      else 
-      { 
-        return 0; // Invalid character found. exit now
-      } 
+    if (buffer == NULL || buffer[0] == '\0') {
+     return 0;
     }
 
-    // If the value is negative, flip the flag by multiplying the value by -1
-    if (sign == -1) { result *= -1; }
-    
-    return result;
+    int value = 0;
+    char current_char = *buffer;
+    int is_negative = 0;
+
+    // Check if it's negative 
+    if (current_char == '-') {
+        is_negative = 1;
+        buffer++;
+    }
+
+    while (current_char != '\0') {
+        value = value * 10 + current_char - '0';
+        buffer++;
+        current_char = *buffer;
+    }
+
+    if (is_negative == 1) {
+        value = -value;
+    }
+
+    return value;
+  }
+
+  #ifdef __EMSCRIPTEN__
+    EMSCRIPTEN_KEEPALIVE
+    #endif
+  char* int_to_string(int value, char* buffer, int buffer_size) {
+    int current = 0;
+int index = 0;
+int is_negative = 0;
+
+// Check if the value is negative 
+if (value < 0) {
+    is_negative = 1;
+    value = -value;
+}
+
+// Add each char to the values 
+do {
+    buffer[index++] = value % 10 + '0';
+    value /= 10;
+} while (value > 0 && index < buffer_size - 1);
+
+// Add the negative sign if it's negative 
+if (index < buffer_size - 1 && is_negative == 1) {
+    buffer[index++] = '-';
+}
+
+// Reverse the buffer array 
+int length = index;
+for (int j = 0; j < length / 2; j++) {
+    int temp = buffer[j];
+    buffer[j] = buffer[length - j - 1];
+    buffer[length - j - 1] = temp;
+}
+buffer[index] = '\0';
+return buffer;
   }
 
 #ifdef __cplusplus
