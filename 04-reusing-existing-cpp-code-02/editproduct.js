@@ -95,7 +95,7 @@ function setErrorMessage(error) {
 function onClickSave() {
     const name = document.getElementById("name").value;
     const categoryId = getSelectedCategoryId();
-
+   
     let errorMessage = "";
     const errorMessagePointer = moduleExports.create_buffer(256);
     alert(errorMessagePointer);
